@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node start.js",
+    "build": "next build",
     "frontend": "cd frontend && npm start",
     "agent": "node agent.js"
   },
@@ -20,6 +21,9 @@
     "livekit-server-sdk": "^2.6.0",
     "multer": "^2.0.1",
     "uuid": "^9.0.0",
-    "ws": "^8.18.2"
+    "ws": "^8.18.2",
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   }
 }
