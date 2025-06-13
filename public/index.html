@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, rgba(0, 98, 255, 0.03) 0%, rgba(218, 98, 196, 0.03) 100%);
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="gradient-bg p-8 rounded-xl shadow-lg mb-8 border border-blue-100">
+            <h1 class="text-4xl font-bold mb-4 text-gray-800">AI Voice Assistant 🎙️</h1>
+            <p class="text-gray-600">Ask questions in your language and get voice responses</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="mb-6">
+                <label for="language" class="block text-gray-700 font-medium mb-2">Select Language</label>
+                <select id="language" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="hi-IN">Hindi</option>
+                    <option value="ta-IN">Tamil</option>
+                    <option value="te-IN">Telugu</option>
+                    <option value="kn-IN">Kannada</option>
+                    <option value="ml-IN">Malayalam</option>
+                    <option value="bn-IN">Bengali</option>
+                    <option value="gu-IN">Gujarati</option>
+                    <option value="mr-IN">Marathi</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col items-center justify-center space-y-6">
+                <button id="recordBtn" class="w-24 h-24 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors">
+                    <span class="text-4xl">🎤</span>
+                </button>
+                <p id="status" class="text-gray-600">Click to start recording</p>
+            </div>
+
+            <div class="mt-8">
+                <div class="mb-4">
+                    <h3 class="text-gray-700 font-medium mb-2">Your Question:</h3>
+                    <p id="questionText" class="p-3 bg-gray-50 rounded-lg min-h-[50px]"></p>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-gray-700 font-medium mb-2">AI Response:</h3>
+                    <p id="responseText" class="p-3 bg-gray-50 rounded-lg min-h-[50px]"></p>
+                </div>
+
+                <div id="audioContainer" class="mt-6 hidden">
+                    <h3 class="text-gray-700 font-medium mb-2">Voice Response</h3>
+                    <audio id="audioPlayer" controls class="w-full"></audio>
+                </div>
+            </div>
+
+            <div id="error" class="mt-4 text-red-600 hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        document.getElementById('recordBtn').addEventListener('click', async () => {
+            const recordBtn = document.getElementById('recordBtn');
+            const status = document.getElementById('status');
+
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const reader = new FileReader();
+                        
+                        reader.onload = async () => {
+                            const base64Audio = reader.result;
+                            await processVoiceInput(base64Audio);
+                        };
+                        
+                        reader.readAsDataURL(audioBlob);
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.classList.add('pulse');
+                    status.textContent = 'Recording... Click to stop';
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    status.textContent = 'Error accessing microphone';
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordBtn.classList.remove('pulse');
+                status.textContent = 'Processing...';
+            }
+        });
+
+        async function processVoiceInput(audioData) {
+            const status = document.getElementById('status');
+            const questionText = document.getElementById('questionText');
+            const responseText = document.getElementById('responseText');
+            const errorDiv = document.getElementById('error');
+            const audioContainer = document.getElementById('audioContainer');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const language = document.getElementById('language').value;
+
+            try {
+                // Convert speech to text
+                const speechToTextResponse = await fetch('/speech-to-text', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        audioData,
+                        languageCode: language
+                    })
+                });
+
+                if (!speechToTextResponse.ok) throw new Error('Failed to convert speech to text');
+                const { transcript } = await speechToTextResponse.json();
+                questionText.textContent = transcript;
+
+                // Get AI response
+                const chatResponse = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: transcript })
+                });
+
+                if (!chatResponse.ok) throw new Error('Failed to get AI response');
+                const chatData = await chatResponse.json();
+                const aiResponse = chatData.choices[0].message.content;
+                responseText.textContent = aiResponse;
+
+                // Convert AI response to speech
+                const textToSpeechResponse = await fetch('/text-to-speech', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: aiResponse,
+                        targetLanguage: language
+                    })
+                });
+
+                if (!textToSpeechResponse.ok) throw new Error('Failed to convert text to speech');
+                const ttsData = await textToSpeechResponse.json();
+                
+                // Update audio player with the response
+                audioPlayer.src = "data:audio/wav;base64," + ttsData.audioBase64;
+                audioContainer.classList.remove('hidden');
+                status.textContent = 'Click to start recording';
+                errorDiv.classList.add('hidden');
+            } catch (error) {
+                console.error('Error:', error);
+                status.textContent = 'Error processing request';
+                errorDiv.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html> 
