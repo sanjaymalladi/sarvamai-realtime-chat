@@ -3,310 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sarvam AI Voice Chat</title>
+    <title>AI Voice Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
+        .gradient-bg {
+            background: linear-gradient(135deg, rgba(0, 98, 255, 0.03) 0%, rgba(218, 98, 196, 0.03) 100%);
         }
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        .status {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            font-weight: bold;
-        }
-        .success { background: rgba(76, 175, 80, 0.3); }
-        .warning { background: rgba(255, 193, 7, 0.3); }
-        .error { background: rgba(244, 67, 54, 0.3); }
-        
-        .test-section {
-            margin: 30px 0;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-        }
-        
-        button {
-            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 10px 5px;
-            transition: transform 0.2s;
-        }
-        button:hover {
-            transform: translateY(-2px);
-        }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 10px;
-            margin: 10px 0;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            backdrop-filter: blur(5px);
-        }
-        input::placeholder, textarea::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-        
-        .response {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            white-space: pre-wrap;
-        }
-        
-        #recordButton {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            font-size: 18px;
-            margin: 20px auto;
-            display: block;
-        }
-        .recording {
-            animation: pulse 1s infinite;
+        .pulse {
+            animation: pulse 2s infinite;
         }
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>🎤 Sarvam AI Voice Chat</h1>
-        
-        <div id="status"></div>
-        
-        <div class="test-section">
-            <h3>🔊 Voice Recording Test</h3>
-            <button id="recordButton">🎤 Start Recording</button>
-            <div id="audioResponse"></div>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="gradient-bg p-8 rounded-xl shadow-lg mb-8 border border-blue-100">
+            <h1 class="text-4xl font-bold mb-4 text-gray-800">AI Voice Assistant 🎙️</h1>
+            <p class="text-gray-600">Ask questions in your language and get voice responses</p>
         </div>
-        
-        <div class="test-section">
-            <h3>💬 Text Chat Test</h3>
-            <input type="text" id="chatInput" placeholder="Type your message here..." />
-            <button onclick="sendChat()">Send Message</button>
-            <div id="chatResponse"></div>
-        </div>
-        
-        <div class="test-section">
-            <h3>🗣️ Text-to-Speech Test</h3>
-            <textarea id="ttsInput" placeholder="Enter text to convert to speech...">Hello! This is a test of the text-to-speech functionality.</textarea>
-            <button onclick="testTTS()">Convert to Speech</button>
-            <div id="ttsResponse"></div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="mb-6">
+                <label for="language" class="block text-gray-700 font-medium mb-2">Select Language</label>
+                <select id="language" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="hi-IN">Hindi</option>
+                    <option value="ta-IN">Tamil</option>
+                    <option value="te-IN">Telugu</option>
+                    <option value="kn-IN">Kannada</option>
+                    <option value="ml-IN">Malayalam</option>
+                    <option value="bn-IN">Bengali</option>
+                    <option value="gu-IN">Gujarati</option>
+                    <option value="mr-IN">Marathi</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col items-center justify-center space-y-6">
+                <button id="recordBtn" class="w-24 h-24 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors">
+                    <span class="text-4xl">🎤</span>
+                </button>
+                <p id="status" class="text-gray-600">Click to start recording</p>
+            </div>
+
+            <div class="mt-8">
+                <div class="mb-4">
+                    <h3 class="text-gray-700 font-medium mb-2">Your Question:</h3>
+                    <p id="questionText" class="p-3 bg-gray-50 rounded-lg min-h-[50px]"></p>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-gray-700 font-medium mb-2">AI Response:</h3>
+                    <p id="responseText" class="p-3 bg-gray-50 rounded-lg min-h-[50px]"></p>
+                </div>
+
+                <div id="audioContainer" class="mt-6 hidden">
+                    <h3 class="text-gray-700 font-medium mb-2">Voice Response</h3>
+                    <audio id="audioPlayer" controls class="w-full"></audio>
+                </div>
+            </div>
+
+            <div id="error" class="mt-4 text-red-600 hidden"></div>
         </div>
     </div>
 
     <script>
-        let isRecording = false;
         let mediaRecorder;
-        let recordedChunks = [];
+        let audioChunks = [];
+        let isRecording = false;
 
-        // Check API health on load
-        async function checkHealth() {
-            try {
-                const response = await fetch('/api/health');
-                const data = await response.json();
-                const statusDiv = document.getElementById('status');
-                
-                if (data.status === 'ok') {
-                    statusDiv.className = 'status success';
-                    statusDiv.innerHTML = `✅ API is working! Sarvam API: ${data.sarvam_api_configured ? 'Configured' : 'Not configured (Demo mode)'}`;
-                } else {
-                    statusDiv.className = 'status error';
-                    statusDiv.innerHTML = '❌ API is not responding';
-                }
-            } catch (error) {
-                const statusDiv = document.getElementById('status');
-                statusDiv.className = 'status error';
-                statusDiv.innerHTML = '❌ Failed to connect to API: ' + error.message;
-            }
-        }
+        document.getElementById('recordBtn').addEventListener('click', async () => {
+            const recordBtn = document.getElementById('recordBtn');
+            const status = document.getElementById('status');
 
-        // Record audio
-        document.getElementById('recordButton').addEventListener('click', async function() {
             if (!isRecording) {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
-                    recordedChunks = [];
-                    
-                    mediaRecorder.ondataavailable = function(event) {
-                        if (event.data.size > 0) {
-                            recordedChunks.push(event.data);
-                        }
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
                     };
-                    
-                    mediaRecorder.onstop = async function() {
-                        const audioBlob = new Blob(recordedChunks, { type: 'audio/wav' });
-                        await processAudio(audioBlob);
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const reader = new FileReader();
+                        
+                        reader.onload = async () => {
+                            const base64Audio = reader.result;
+                            await processVoiceInput(base64Audio);
+                        };
+                        
+                        reader.readAsDataURL(audioBlob);
                     };
-                    
+
                     mediaRecorder.start();
                     isRecording = true;
-                    this.textContent = '⏹️ Stop Recording';
-                    this.classList.add('recording');
-                    
-                    // Auto-stop after 5 seconds
-                    setTimeout(() => {
-                        if (isRecording) {
-                            this.click();
-                        }
-                    }, 5000);
-                    
+                    recordBtn.classList.add('pulse');
+                    status.textContent = 'Recording... Click to stop';
                 } catch (error) {
-                    document.getElementById('audioResponse').innerHTML = 
-                        `<div class="status error">❌ Microphone access denied: ${error.message}</div>`;
+                    console.error('Error accessing microphone:', error);
+                    status.textContent = 'Error accessing microphone';
                 }
             } else {
                 mediaRecorder.stop();
-                mediaRecorder.stream.getTracks().forEach(track => track.stop());
                 isRecording = false;
-                this.textContent = '🎤 Start Recording';
-                this.classList.remove('recording');
+                recordBtn.classList.remove('pulse');
+                status.textContent = 'Processing...';
             }
         });
 
-        async function processAudio(audioBlob) {
-            const formData = new FormData();
-            formData.append('audio', audioBlob, 'recording.wav');
-            
-            try {
-                document.getElementById('audioResponse').innerHTML = '<div class="status">Processing audio...</div>';
-                
-                const response = await fetch('/api/speech-to-text', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    document.getElementById('audioResponse').innerHTML = 
-                        `<div class="response">📝 Transcript: ${data.transcript}</div>`;
-                    
-                    // Auto-send to chat
-                    if (data.transcript && !data.transcript.includes('Demo mode')) {
-                        document.getElementById('chatInput').value = data.transcript;
-                        sendChat();
-                    }
-                } else {
-                    document.getElementById('audioResponse').innerHTML = 
-                        `<div class="status error">❌ ${data.error}</div>`;
-                }
-            } catch (error) {
-                document.getElementById('audioResponse').innerHTML = 
-                    `<div class="status error">❌ Error: ${error.message}</div>`;
-            }
-        }
+        async function processVoiceInput(audioData) {
+            const status = document.getElementById('status');
+            const questionText = document.getElementById('questionText');
+            const responseText = document.getElementById('responseText');
+            const errorDiv = document.getElementById('error');
+            const audioContainer = document.getElementById('audioContainer');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const language = document.getElementById('language').value;
 
-        async function sendChat() {
-            const message = document.getElementById('chatInput').value;
-            if (!message) return;
-            
             try {
-                document.getElementById('chatResponse').innerHTML = '<div class="status">Thinking...</div>';
-                
-                const response = await fetch('/api/chat', {
+                // Convert speech to text
+                const speechToTextResponse = await fetch('/speech-to-text', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message })
+                    body: JSON.stringify({ 
+                        audioData,
+                        languageCode: language
+                    })
                 });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    document.getElementById('chatResponse').innerHTML = 
-                        `<div class="response">🤖 ${data.response}</div>`;
-                    
-                    // Auto-convert response to speech
-                    document.getElementById('ttsInput').value = data.response;
-                    testTTS();
-                } else {
-                    document.getElementById('chatResponse').innerHTML = 
-                        `<div class="status error">❌ ${data.error}</div>`;
-                }
-            } catch (error) {
-                document.getElementById('chatResponse').innerHTML = 
-                    `<div class="status error">❌ Error: ${error.message}</div>`;
-            }
-        }
 
-        async function testTTS() {
-            const text = document.getElementById('ttsInput').value;
-            if (!text) return;
-            
-            try {
-                document.getElementById('ttsResponse').innerHTML = '<div class="status">Generating speech...</div>';
-                
-                const response = await fetch('/api/text-to-speech', {
+                if (!speechToTextResponse.ok) throw new Error('Failed to convert speech to text');
+                const { transcript } = await speechToTextResponse.json();
+                questionText.textContent = transcript;
+
+                // Get AI response
+                const chatResponse = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text })
+                    body: JSON.stringify({ message: transcript })
                 });
+
+                if (!chatResponse.ok) throw new Error('Failed to get AI response');
+                const chatData = await chatResponse.json();
+                const aiResponse = chatData.choices[0].message.content;
+                responseText.textContent = aiResponse;
+
+                // Convert AI response to speech
+                const textToSpeechResponse = await fetch('/text-to-speech', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: aiResponse,
+                        targetLanguage: language
+                    })
+                });
+
+                if (!textToSpeechResponse.ok) throw new Error('Failed to convert text to speech');
+                const ttsData = await textToSpeechResponse.json();
                 
-                if (response.ok) {
-                    const audioBlob = await response.blob();
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    const audio = new Audio(audioUrl);
-                    
-                    document.getElementById('ttsResponse').innerHTML = 
-                        `<div class="response">🔊 <audio controls><source src="${audioUrl}" type="audio/wav"></audio></div>`;
-                    
-                    audio.play();
-                } else {
-                    const data = await response.json();
-                    document.getElementById('ttsResponse').innerHTML = 
-                        `<div class="status error">❌ ${data.error}</div>`;
-                }
+                // Update audio player with the response
+                audioPlayer.src = "data:audio/wav;base64," + ttsData.audioBase64;
+                audioContainer.classList.remove('hidden');
+                status.textContent = 'Click to start recording';
+                errorDiv.classList.add('hidden');
             } catch (error) {
-                document.getElementById('ttsResponse').innerHTML = 
-                    `<div class="status error">❌ Error: ${error.message}</div>`;
+                console.error('Error:', error);
+                status.textContent = 'Error processing request';
+                errorDiv.textContent = error.message;
+                errorDiv.classList.remove('hidden');
             }
         }
-
-        // Enter key support for chat
-        document.getElementById('chatInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendChat();
-            }
-        });
-
-        // Check health on load
-        checkHealth();
     </script>
 </body>
 </html> 
